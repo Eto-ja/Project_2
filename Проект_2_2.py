@@ -14,6 +14,7 @@ background = pygame.Surface((800, 600))
 background.fill(pygame.Color('#000000'))
 
 manager = pygame_gui.UIManager((800, 600))
+manager2 = pygame_gui.UIManager((800, 600))
 
 close_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 40, HEIGHT // 2), (120, 50)),
                                             text='Выйти',
@@ -27,6 +28,15 @@ how_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((WIDTH // 2 
 record_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 40, HEIGHT // 2 - 50), (120, 50)),
                                              text='Уровни',
                                              manager=manager)
+button_1 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((20, 70), (50, 50)),
+                                        text='1',
+                                        manager=manager2)
+button_2 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((80, 70), (50, 50)),
+                                        text='2',
+                                        manager=manager2)
+back_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((WIDTH - 110, 10), (100, 50)),
+                                           text='Назад',
+                                           manager=manager2)
 
 
 def terminate():
@@ -114,7 +124,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
 tile_images = {
     'wall': load_image('box.png'),
-    'empty': load_image('grass.png')
+    'empty': load_image('grass.png'),
+    'key': load_image('key.png')
 }
 
 player_image = load_image('mar.png')
@@ -122,6 +133,8 @@ player_image = load_image('mar.png')
 tile_width = tile_height = 50
 
 tiles_group = pygame.sprite.Group()
+boxes_group = pygame.sprite.Group()
+keys_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 
@@ -129,6 +142,11 @@ player_group = pygame.sprite.Group()
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
+        if tile_type == 'wall':
+            boxes_group.add(self)
+        if tile_type == 'key':
+            keys_group.add(self)
+
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
@@ -140,18 +158,45 @@ class Player(pygame.sprite.Sprite):
         self.image = player_image
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 15, tile_height * pos_y + 5)
+        self.keys = 0
 
     def right(self):
         self.rect.x += 50
+        if self.check_collide():
+            self.left()
 
     def left(self):
         self.rect.x -= 50
+        if self.check_collide():
+            self.right()
 
     def down(self):
         self.rect.y += 50
+        if self.check_collide():
+            self.up()
 
     def up(self):
         self.rect.y -= 50
+        if self.check_collide():
+            self.down()
+
+    # def update(self):
+    #     if not pygame.sprite.collide_mask(self, self.mountain):
+    #         self.rect = self.rect.move(0, 1)
+    def check_collide(self):
+        if pygame.sprite.spritecollide(self, boxes_group, False):
+            return True
+        return False
+
+    def update(self):
+        key = pygame.sprite.spritecollide(self, keys_group, False)
+        if len(key) != 0:
+
+            key = key[0]
+            self.keys += 1
+            keys_group.remove(key)
+            all_sprites.remove(key)
+            tiles_group.remove(key)
 
 
 class Camera:
@@ -183,8 +228,11 @@ def generate_level(level):
                 Tile('wall', x, y)
             elif level[y][x] == '@':
                 Tile('empty', x, y)
-            # todo:
                 new_player = Player(x, y)
+            elif level[y][x] == '$':
+                Tile('empty', x, y)
+                Tile('key', x, y)
+
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
@@ -222,7 +270,7 @@ def start_game(player, camera):
 
 def main():
     # start_screen()
-
+    flag = False
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -231,17 +279,34 @@ def main():
                 if event.ui_element == close_button:
                     terminate()
                 if event.ui_element == start_button:
-                    player, _, _ = generate_level(load_level('map.txt'))
+                    player, _, _ = generate_level(load_level('1.txt'))
                     camera = Camera()
                     start_game(
                         player, camera
                     )
+                if event.ui_element == record_button:
+                    flag = True
+                if event.ui_element == back_button:
+                    flag = False
+                if event.ui_element == button_1:
+                    player, _, _ = generate_level(load_level('1.txt'))
+                    camera = Camera()
+                    start_game(player, camera)
+                # if event.ui_element == button_2:
+                #     player, _, _ = generate_level(load_level('map.txt'))
+                #     camera = Camera()
+                #     start_game(player, camera)
 
+            manager2.process_events(event)
             manager.process_events(event)
 
         manager.update(FPS)
+        manager2.update(FPS)
         screen.blit(background, (0, 0))
-        manager.draw_ui(screen)
+        if flag:
+            manager2.draw_ui(screen)
+        else:
+            manager.draw_ui(screen)
         pygame.display.update()
         all_sprites.draw(screen)
         pygame.display.flip()
