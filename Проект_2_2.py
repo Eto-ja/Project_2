@@ -55,23 +55,28 @@ def terminate():
     sys.exit()
 
 
-def start_screen():
-    intro_text = ["Какая-то заставка хорошая", "",
-                  "",
-                  ""]
+def how():
+    intro_text = ["Правила игры", "",
+                  "Каждый уровень представляет собой лабиринт,",
+                  "нужно найти ключ, затем выйти через дверь.",
+                  "Без ключа выйти через дверь не получиться"]
 
     # fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     # screen.blit(fon, (0, 0))
+    font_2 = pygame.font.SysFont('Arial', 25)
+    pygame.draw.rect(
+        screen, pygame.Color('grey'), (380, 50, 80, 30))
     font = pygame.font.Font(None, 30)
     text_coord = 50
     for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('blue'))
+        string_rendered = font_2.render(line, 1, pygame.Color('blue'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
         intro_rect.x = 10
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
+    screen.blit(font_2.render('Назад', True, pygame.Color('black')), (380, 50))
 
     while True:
         for event in pygame.event.get():
@@ -155,7 +160,7 @@ door_group = pygame.sprite.Group()
 start_time = 0
 shrift = False
 flag_end = False
-file = ['1.py', 'map.txt']
+file = ['1.txt', 'map.txt']
 number = 1
 flag = False
 
@@ -218,7 +223,6 @@ class Player(pygame.sprite.Sprite):
             tiles_group.remove(key)
         door = pygame.sprite.spritecollide(self, door_group, False)
         if len(door) != 0:
-            # door = door[0]
             if self.keys == 1:
                 end(start_time)
 
@@ -449,6 +453,9 @@ def main():
                     player, _, _ = generate_level(load_level(file[number - 1]))
                     camera = Camera()
                     start_game(player, camera)
+                if event.ui_element == how_button:
+                    screen.fill((0, 0, 0))
+                    how()
 
             manager2.process_events(event)
             manager.process_events(event)
