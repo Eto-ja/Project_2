@@ -14,7 +14,7 @@ clock = pygame.time.Clock()
 background = pygame.Surface((WIDTH, HEIGHT))
 background.fill(pygame.Color('#000000'))
 
-manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'theme.json')
 manager2 = pygame_gui.UIManager((WIDTH, HEIGHT))
 manager3 = pygame_gui.UIManager((WIDTH, HEIGHT))
 
@@ -163,6 +163,7 @@ flag_end = False
 file = ['1.txt', 'map.txt']
 number = 1
 flag = False
+stop = False
 
 
 class Tile(pygame.sprite.Sprite):
@@ -299,6 +300,14 @@ def start_game(player, camera):
         player_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
+        # if stop:
+            # screen.fill((0, 0, 0))
+            # for item in all_sprites:
+            #     item.kill()
+            #     all_sprites.clear(screen, background)
+            #     all_sprites.draw(screen)
+            # end_3(10)
+            # return
 
 
 class Game(pygame.sprite.Sprite):
@@ -318,7 +327,8 @@ class Game(pygame.sprite.Sprite):
 
 
 def end(start_time):
-    global flag_end, number, file
+    global flag_end, number, file, stop
+    stop = True
     delta = datetime.datetime.now() - start_time
     game = Game('green.png')
     fps = 300
@@ -339,23 +349,49 @@ def end(start_time):
         screen.blit(game.image, game.rect)
         clock.tick(fps)
         if shrift:
-            font = pygame.font.Font(None, 30)
-            text_coord = 50
-            for line in intro_text:
-                string_rendered = font.render(line, 1, pygame.Color('black'))
-                intro_rect = string_rendered.get_rect()
-                text_coord += 10
-                intro_rect.top = text_coord
-                intro_rect.x = 10
-                text_coord += intro_rect.height
-                screen.blit(string_rendered, intro_rect)
-            flag_end = True
-        if flag_end:
-            # end_2()
-            manager3.update(FPS)
-            manager3.draw_ui(screen)
+            end_3(delta)
+            # return
+            # return
+        #     font = pygame.font.Font(None, 30)
+        #     text_coord = 50
+        #     for line in intro_text:
+        #         string_rendered = font.render(line, 1, pygame.Color('black'))
+        #         intro_rect = string_rendered.get_rect()
+        #         text_coord += 10
+        #         intro_rect.top = text_coord
+        #         intro_rect.x = 10
+        #         text_coord += intro_rect.height
+        #         screen.blit(string_rendered, intro_rect)
+        #     flag_end = True
+        # if flag_end:
+        #     # end_2()
+        #     manager3.update(FPS)
+        #     manager3.draw_ui(screen)
         pygame.display.update()
         pygame.display.flip()
+
+
+def end_3(delta):
+    global flag_end
+    fon = pygame.transform.scale(load_image('green.jpg'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    intro_text = [f"Уровень {number} пройден", "",
+                  f"Потраченное время: {delta.seconds} секунд",
+                  ""]
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+        flag_end = True
+    if flag_end:
+        manager3.update(FPS)
+        manager3.draw_ui(screen)
 
 
 # def end_2():
