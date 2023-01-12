@@ -115,6 +115,9 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
+all_sprites = pygame.sprite.Group()
+
+
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(all_sprites)
@@ -146,14 +149,14 @@ tile_images = {
     'door_close': load_image('door_close.png')
 }
 
-player_image = load_image('mar.png')
+# player_image = AnimatedSprite(load_image("people.png"), 4, 5, 50, 50)
+player_image = load_image("mar.png")
 
 tile_width = tile_height = 50
 
 tiles_group = pygame.sprite.Group()
 boxes_group = pygame.sprite.Group()
 keys_group = pygame.sprite.Group()
-all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 door_group = pygame.sprite.Group()
 
