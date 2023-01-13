@@ -191,6 +191,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 15, tile_height * pos_y + 5)
         self.keys = 0
+        self.play = False
 
     def right(self):
         self.rect.x += 50
@@ -218,6 +219,7 @@ class Player(pygame.sprite.Sprite):
         return False
 
     def update(self):
+        global stop
         key = pygame.sprite.spritecollide(self, keys_group, False)
         if len(key) != 0:
             key = key[0]
@@ -228,7 +230,8 @@ class Player(pygame.sprite.Sprite):
         door = pygame.sprite.spritecollide(self, door_group, False)
         if len(door) != 0:
             if self.keys == 1:
-                end(start_time)
+                stop = True
+                #end(start_time)
 
 
 class Camera:
@@ -273,7 +276,7 @@ def generate_level(level):
 
 
 def start_game(player, camera):
-    global start_time
+    global start_time, stop
     start_time = datetime.datetime.now()
     while True:
         for event in pygame.event.get():
@@ -303,14 +306,14 @@ def start_game(player, camera):
         player_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
-        # if stop:
+        if stop:
+            end(start_time)
             # screen.fill((0, 0, 0))
             # for item in all_sprites:
             #     item.kill()
             #     all_sprites.clear(screen, background)
             #     all_sprites.draw(screen)
-            # end_3(10)
-            # return
+
 
 
 class Game(pygame.sprite.Sprite):
@@ -351,6 +354,7 @@ def end(start_time):
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == next_button:
                     print('nexrt')
+                    print(stop)
                     flag_end = False
                     player, _, _ = generate_level(load_level(file[number - 1]))
                     camera = Camera()
@@ -441,50 +445,6 @@ def end(start_time):
 #     if flag_end:
 #         manager3.update(FPS)
 #         manager3.draw_ui(screen)
-
-
-# def end_2():
-    # global file, number, flag_end, flag
-    # # while True:
-    # for event in pygame.event.get():
-    #     if event.type == pygame.QUIT:
-    #         sys.exit()
-    #     if event.type == pygame_gui.UI_BUTTON_PRESSED:
-    #         if event.ui_element == next_button:
-    #             print('nexrt')
-    #             flag_end = False
-    #             player, _, _ = generate_level(load_level(file[number - 1]))
-    #             camera = Camera()
-    #             start_game(player, camera)
-    #         if event.ui_element == menu_button:
-    #             print('menu')
-    #             flag_end = False
-    #             flag = False
-    #         if event.ui_element == zanavo_button:
-    #             print('zanovo')
-    #             flag_end = False
-    #             player, _, _ = generate_level(load_level(file[number - 1]))
-    #             camera = Camera()
-    #             start_game(player, camera)
-    #
-    #     manager2.process_events(event)
-    #     manager.process_events(event)
-    #     manager3.process_events(event)
-    #
-    #     screen.blit(background, (0, 0))
-    #     manager2.update(FPS)
-    #     manager.update(FPS)
-    #     manager3.update(FPS)
-    #     if flag:
-    #         manager2.draw_ui(screen)
-    #     else:
-    #         manager.draw_ui(screen)
-    #     if flag_end:
-    #         manager3.draw_ui(screen)
-    #     pygame.display.update()
-    #     # all_sprites.draw(screen)
-    #     pygame.display.flip()
-    #     clock.tick(FPS)
 
 
 def main():
