@@ -348,6 +348,26 @@ def end(start_time):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.ui_element == next_button:
+                    print('nexrt')
+                    flag_end = False
+                    player, _, _ = generate_level(load_level(file[number - 1]))
+                    camera = Camera()
+                    start_game(player, camera)
+                if event.ui_element == menu_button:
+                    print('menu')
+                    flag_end = False
+                    flag = False
+                if event.ui_element == zanavo_button:
+                    print('zanovo')
+                    flag_end = False
+                    player, _, _ = generate_level(load_level(file[number - 1]))
+                    camera = Camera()
+                    start_game(player, camera)
+            manager3.process_events(event)
+        # manager3.update(FPS)
+        # manager3.draw_ui(screen)
         game.move()
         screen.blit(game.image, game.rect)
         clock.tick(fps)
@@ -368,29 +388,29 @@ def end(start_time):
             # end_2()
             # manager3.update(FPS)
             # manager3.draw_ui(screen)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == next_button:
-                        print('nexrt')
-                        flag_end = False
-                        player, _, _ = generate_level(load_level(file[number - 1]))
-                        camera = Camera()
-                        start_game(player, camera)
-                    if event.ui_element == menu_button:
-                        print('menu')
-                        flag_end = False
-                        flag = False
-                    if event.ui_element == zanavo_button:
-                        print('zanovo')
-                        flag_end = False
-                        player, _, _ = generate_level(load_level(file[number - 1]))
-                        camera = Camera()
-                        start_game(player, camera)
+            # for event in pygame.event.get():
+            #     if event.type == pygame.QUIT:
+            #         sys.exit()
+            #     if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            #         if event.ui_element == next_button:
+            #             print('nexrt')
+            #             flag_end = False
+            #             player, _, _ = generate_level(load_level(file[number - 1]))
+            #             camera = Camera()
+            #             start_game(player, camera)
+            #         if event.ui_element == menu_button:
+            #             print('menu')
+            #             flag_end = False
+            #             flag = False
+            #         if event.ui_element == zanavo_button:
+            #             print('zanovo')
+            #             flag_end = False
+            #             player, _, _ = generate_level(load_level(file[number - 1]))
+            #             camera = Camera()
+            #             start_game(player, camera)
                 # manager2.process_events(event)
                 # manager.process_events(event)
-                manager3.process_events(event)
+                # manager3.process_events(event)
 
         # screen.blit(background, (0, 0))
             manager3.update(FPS)
