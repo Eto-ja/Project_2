@@ -352,49 +352,75 @@ def end(start_time):
         screen.blit(game.image, game.rect)
         clock.tick(fps)
         if shrift:
-            end_3(delta)
-            # return
-            # return
-        #     font = pygame.font.Font(None, 30)
-        #     text_coord = 50
-        #     for line in intro_text:
-        #         string_rendered = font.render(line, 1, pygame.Color('black'))
-        #         intro_rect = string_rendered.get_rect()
-        #         text_coord += 10
-        #         intro_rect.top = text_coord
-        #         intro_rect.x = 10
-        #         text_coord += intro_rect.height
-        #         screen.blit(string_rendered, intro_rect)
-        #     flag_end = True
-        # if flag_end:
-        #     # end_2()
-        #     manager3.update(FPS)
-        #     manager3.draw_ui(screen)
+            # end_3(delta)
+            font = pygame.font.Font(None, 30)
+            text_coord = 50
+            for line in intro_text:
+                string_rendered = font.render(line, 1, pygame.Color('black'))
+                intro_rect = string_rendered.get_rect()
+                text_coord += 10
+                intro_rect.top = text_coord
+                intro_rect.x = 10
+                text_coord += intro_rect.height
+                screen.blit(string_rendered, intro_rect)
+            flag_end = True
+        if flag_end:
+            # end_2()
+            # manager3.update(FPS)
+            # manager3.draw_ui(screen)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == next_button:
+                        print('nexrt')
+                        flag_end = False
+                        player, _, _ = generate_level(load_level(file[number - 1]))
+                        camera = Camera()
+                        start_game(player, camera)
+                    if event.ui_element == menu_button:
+                        print('menu')
+                        flag_end = False
+                        flag = False
+                    if event.ui_element == zanavo_button:
+                        print('zanovo')
+                        flag_end = False
+                        player, _, _ = generate_level(load_level(file[number - 1]))
+                        camera = Camera()
+                        start_game(player, camera)
+                # manager2.process_events(event)
+                # manager.process_events(event)
+                manager3.process_events(event)
+
+        # screen.blit(background, (0, 0))
+            manager3.update(FPS)
+            manager3.draw_ui(screen)
         pygame.display.update()
         pygame.display.flip()
+        clock.tick(FPS)
 
 
-def end_3(delta):
-    global flag_end
-    fon = pygame.transform.scale(load_image('green.jpg'), (WIDTH, HEIGHT))
-    screen.blit(fon, (0, 0))
-    intro_text = [f"Уровень {number} пройден", "",
-                  f"Потраченное время: {delta.seconds} секунд",
-                  ""]
-    font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-        flag_end = True
-    if flag_end:
-        manager3.update(FPS)
-        manager3.draw_ui(screen)
+# def end_3(delta):
+#     global flag_end
+#     fon = pygame.transform.scale(load_image('green.jpg'), (WIDTH, HEIGHT))
+#     screen.blit(fon, (0, 0))
+#     intro_text = [f"Уровень {number} пройден", "",
+#                   f"Потраченное время: {delta.seconds} секунд",
+#                   ""]
+#     font = pygame.font.Font(None, 30)
+#     text_coord = 50
+#     for line in intro_text:
+#         string_rendered = font.render(line, 1, pygame.Color('black'))
+#         intro_rect = string_rendered.get_rect()
+#         text_coord += 10
+#         intro_rect.top = text_coord
+#         intro_rect.x = 10
+#         text_coord += intro_rect.height
+#         screen.blit(string_rendered, intro_rect)
+#         flag_end = True
+#     if flag_end:
+#         manager3.update(FPS)
+#         manager3.draw_ui(screen)
 
 
 # def end_2():
