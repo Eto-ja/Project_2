@@ -227,11 +227,12 @@ class Player(pygame.sprite.Sprite):
             keys_group.remove(key)
             all_sprites.remove(key)
             tiles_group.remove(key)
+
         door = pygame.sprite.spritecollide(self, door_group, False)
         if len(door) != 0:
             if self.keys == 1:
                 stop = True
-                #end(start_time)
+                # end(start_time)
 
 
 class Camera:
@@ -270,13 +271,12 @@ def generate_level(level):
             elif level[y][x] == ';':
                 Tile('door_close', x, y)
 
-
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
 
 def start_game(player, camera):
-    global start_time, stop
+    global start_time, stop, number, all_sprites, boxes_group, door_group, keys_group, tiles_group
     start_time = datetime.datetime.now()
     while True:
         for event in pygame.event.get():
@@ -309,13 +309,26 @@ def start_game(player, camera):
         if stop:
             end(start_time)
             stop = False
-            player.up()
+            number += 1
+            player_group.remove(player)
+            all_sprites = pygame.sprite.Group()
+            boxes_group = pygame.sprite.Group()
+            door_group = pygame.sprite.Group()
+            keys_group = pygame.sprite.Group()
+            tiles_group = pygame.sprite.Group()
+
+            player, _, _ = generate_level(load_level(file[number - 1]))
+
+            player_group.add(player)
+            all_sprites.add(player)
+
+            camera = Camera()
+
             # screen.fill((0, 0, 0))
             # for item in all_sprites:
             #     item.kill()
             #     all_sprites.clear(screen, background)
             #     all_sprites.draw(screen)
-
 
 
 class Game(pygame.sprite.Sprite):
@@ -336,7 +349,6 @@ class Game(pygame.sprite.Sprite):
 
 def end(start_time):
     global flag_end, number, file, stop
-    stop = True
     delta = datetime.datetime.now() - start_time
     game = Game('green.png')
     fps = 300
@@ -347,30 +359,30 @@ def end(start_time):
 
     # fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     # screen.blit(fon, (0, 0))
-    if len(file) < number:
-        number += 1
+    # if len(file) < number:
+    #     number += 1
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == next_button:
-                    print('nexrt')
-                    print(stop)
                     flag_end = False
-                    player, _, _ = generate_level(load_level(file[number - 1]))
-                    camera = Camera()
-                    start_game(player, camera)
+                    # player, _, _ = generate_level(load_level(file[number - 1]))
+                    # camera = Camera()
+                    return
+                    # start_game(player, camera)
                 if event.ui_element == menu_button:
-                    print('menu')
                     flag_end = False
                     flag = False
+                    return
                 if event.ui_element == zanavo_button:
-                    print('zanovo')
                     flag_end = False
-                    player, _, _ = generate_level(load_level(file[number - 1]))
-                    camera = Camera()
-                    start_game(player, camera)
+                    # player, _, _ = generate_level(load_level(file[number - 1]))
+                    # camera = Camera()
+                    return
+                    # start_game(player, camera)
             manager3.process_events(event)
         # manager3.update(FPS)
         # manager3.draw_ui(screen)
@@ -391,63 +403,15 @@ def end(start_time):
                 screen.blit(string_rendered, intro_rect)
             flag_end = True
         if flag_end:
-            # end_2()
-            # manager3.update(FPS)
-            # manager3.draw_ui(screen)
-            # for event in pygame.event.get():
-            #     if event.type == pygame.QUIT:
-            #         sys.exit()
-            #     if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            #         if event.ui_element == next_button:
-            #             print('nexrt')
-            #             flag_end = False
-            #             player, _, _ = generate_level(load_level(file[number - 1]))
-            #             camera = Camera()
-            #             start_game(player, camera)
-            #         if event.ui_element == menu_button:
-            #             print('menu')
-            #             flag_end = False
-            #             flag = False
-            #         if event.ui_element == zanavo_button:
-            #             print('zanovo')
-            #             flag_end = False
-            #             player, _, _ = generate_level(load_level(file[number - 1]))
-            #             camera = Camera()
-            #             start_game(player, camera)
-                # manager2.process_events(event)
-                # manager.process_events(event)
-                # manager3.process_events(event)
 
-        # screen.blit(background, (0, 0))
+            # screen.blit(background, (0, 0))
             manager3.update(FPS)
             manager3.draw_ui(screen)
+
         pygame.display.update()
         pygame.display.flip()
         clock.tick(FPS)
         stop = False
-
-
-# def end_3(delta):
-#     global flag_end
-#     fon = pygame.transform.scale(load_image('green.jpg'), (WIDTH, HEIGHT))
-#     screen.blit(fon, (0, 0))
-#     intro_text = [f"Уровень {number} пройден", "",
-#                   f"Потраченное время: {delta.seconds} секунд",
-#                   ""]
-#     font = pygame.font.Font(None, 30)
-#     text_coord = 50
-#     for line in intro_text:
-#         string_rendered = font.render(line, 1, pygame.Color('black'))
-#         intro_rect = string_rendered.get_rect()
-#         text_coord += 10
-#         intro_rect.top = text_coord
-#         intro_rect.x = 10
-#         text_coord += intro_rect.height
-#         screen.blit(string_rendered, intro_rect)
-#         flag_end = True
-#     if flag_end:
-#         manager3.update(FPS)
-#         manager3.draw_ui(screen)
 
 
 def main():
