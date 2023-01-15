@@ -308,6 +308,8 @@ def start_game(player, camera):
         clock.tick(FPS)
         if stop:
             end(start_time)
+            stop = False
+            player.up()
             # screen.fill((0, 0, 0))
             # for item in all_sprites:
             #     item.kill()
@@ -422,6 +424,7 @@ def end(start_time):
         pygame.display.update()
         pygame.display.flip()
         clock.tick(FPS)
+        stop = False
 
 
 # def end_3(delta):
