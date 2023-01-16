@@ -278,7 +278,7 @@ def generate_level(level):
 
 def start_game(player, camera):
     global start_time, stop, number, all_sprites, boxes_group, door_group, keys_group, tiles_group, button, shrift, \
-        flag_end
+        flag_end, flag
     shrift = False
     start_time = datetime.datetime.now()
     while True:
@@ -295,27 +295,27 @@ def start_game(player, camera):
                     player.down()
                 if keys[pygame.K_UP]:
                     player.up()
-            if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                if event.ui_element == next_button:
-                    button = 1
-                    print('next')
-                    flag_end = False
-                    # player, _, _ = generate_level(load_level(file[number - 1]))
-                    # camera = Camera()
-                    return
-                    # start_game(player, camera)
-                if event.ui_element == menu_button:
-                    button = 2
-                    flag_end = False
-                    flag = False
-                    return
-                if event.ui_element == zanavo_button:
-                    button = 3
-                    print('zanovo')
-                    flag_end = False
-                    # player, _, _ = generate_level(load_level(file[number - 1]))
-                    # camera = Camera()
-                    return
+            # if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            #     if event.ui_element == next_button:
+            #         button = 1
+            #         print('next')
+            #         flag_end = False
+            #         # player, _, _ = generate_level(load_level(file[number - 1]))
+            #         # camera = Camera()
+            #         return
+            #         # start_game(player, camera)
+            #     if event.ui_element == menu_button:
+            #         button = 2
+            #         flag_end = False
+            #         flag = False
+            #         return
+            #     if event.ui_element == zanavo_button:
+            #         button = 3
+            #         print('zanovo')
+            #         flag_end = False
+            #         # player, _, _ = generate_level(load_level(file[number - 1]))
+            #         # camera = Camera()
+            #         return
 
         clock.tick(FPS)
         screen.fill((0, 0, 0))
@@ -426,8 +426,10 @@ def end(start_time):
                 if event.ui_element == menu_button:
                     flag_end = False
                     flag = False
+                    button = 2
                     return
                 if event.ui_element == zanavo_button:
+                    button = 3
                     flag_end = False
                     # player, _, _ = generate_level(load_level(file[number - 1]))
                     # camera = Camera()
