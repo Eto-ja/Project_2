@@ -167,6 +167,7 @@ file = ['1.txt', 'map.txt']
 number = 1
 flag = False
 stop = False
+stop_2 = False
 button = 0
 
 
@@ -220,7 +221,7 @@ class Player(pygame.sprite.Sprite):
         return False
 
     def update(self):
-        global stop
+        global stop, stop_2
         key = pygame.sprite.spritecollide(self, keys_group, False)
         if len(key) != 0:
             key = key[0]
@@ -232,8 +233,7 @@ class Player(pygame.sprite.Sprite):
         door = pygame.sprite.spritecollide(self, door_group, False)
         if len(door) != 0:
             if self.keys == 1:
-                stop = True
-                # end(start_time)
+                stop_2 = True
 
 
 class Camera:
@@ -278,7 +278,7 @@ def generate_level(level):
 
 def start_game(player, camera):
     global start_time, stop, number, all_sprites, boxes_group, door_group, keys_group, tiles_group, button, shrift, \
-        flag_end, flag
+        flag_end, flag, stop_2
     shrift = False
     start_time = datetime.datetime.now()
     while True:
@@ -295,27 +295,6 @@ def start_game(player, camera):
                     player.down()
                 if keys[pygame.K_UP]:
                     player.up()
-            # if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            #     if event.ui_element == next_button:
-            #         button = 1
-            #         print('next')
-            #         flag_end = False
-            #         # player, _, _ = generate_level(load_level(file[number - 1]))
-            #         # camera = Camera()
-            #         return
-            #         # start_game(player, camera)
-            #     if event.ui_element == menu_button:
-            #         button = 2
-            #         flag_end = False
-            #         flag = False
-            #         return
-            #     if event.ui_element == zanavo_button:
-            #         button = 3
-            #         print('zanovo')
-            #         flag_end = False
-            #         # player, _, _ = generate_level(load_level(file[number - 1]))
-            #         # camera = Camera()
-            #         return
 
         clock.tick(FPS)
         screen.fill((0, 0, 0))
@@ -336,9 +315,45 @@ def start_game(player, camera):
             screen.fill((0, 0, 0))
             stop = False
             start_time = datetime.datetime.now()
-            number += 1
-            print(button)
             if button == 1:
+                if number == 2:
+                    print('You win!')
+                    shrift = False
+                    player_group.remove(player)
+                    all_sprites = pygame.sprite.Group()
+                    boxes_group = pygame.sprite.Group()
+                    door_group = pygame.sprite.Group()
+                    keys_group = pygame.sprite.Group()
+                    tiles_group = pygame.sprite.Group()
+                    fon = load_image('over.jpg.jpeg')
+                    screen.blit(fon, (0, 0))
+                else:
+                    number += 1
+                    shrift = False
+                    player_group.remove(player)
+                    all_sprites = pygame.sprite.Group()
+                    boxes_group = pygame.sprite.Group()
+                    door_group = pygame.sprite.Group()
+                    keys_group = pygame.sprite.Group()
+                    tiles_group = pygame.sprite.Group()
+
+                    player, _, _ = generate_level(load_level(file[number - 1]))
+
+                    player_group.add(player)
+                    all_sprites.add(player)
+
+                    camera = Camera()
+            if button == 2:
+                shrift = False
+                flag_end = False
+                flag = False
+                all_sprites = pygame.sprite.Group()
+                boxes_group = pygame.sprite.Group()
+                door_group = pygame.sprite.Group()
+                keys_group = pygame.sprite.Group()
+                tiles_group = pygame.sprite.Group()
+                return
+            if button == 3:
                 shrift = False
                 player_group.remove(player)
                 all_sprites = pygame.sprite.Group()
@@ -351,29 +366,9 @@ def start_game(player, camera):
 
                 player_group.add(player)
                 all_sprites.add(player)
+        if stop_2:
+            stop = True
 
-                camera = Camera()
-            if button == 2:
-                shrift = False
-                flag_end = False
-                flag = False
-            if button == 3:
-                shrift = False
-                player_group.remove(player)
-                all_sprites = pygame.sprite.Group()
-                boxes_group = pygame.sprite.Group()
-                door_group = pygame.sprite.Group()
-                keys_group = pygame.sprite.Group()
-                tiles_group = pygame.sprite.Group()
-
-                player, _, _ = generate_level(load_level(file[number - 2]))
-
-                player_group.add(player)
-                all_sprites.add(player)
-
-
-
-            # screen.fill((0, 0, 0))
             # for item in all_sprites:
             #     item.kill()
             #     all_sprites.clear(screen, background)
@@ -397,13 +392,13 @@ class Game(pygame.sprite.Sprite):
 
 
 def end(start_time):
-    global flag_end, number, file, stop, button, shrift, flag
+    global flag_end, number, file, stop, button, shrift, flag, stop_2
     delta = datetime.datetime.now() - start_time
     game = Game('green.png')
     fps = 300
     clock = pygame.time.Clock()
     intro_text = [f"Уровень {number} пройден", "",
-                  f"Потраченное время: {delta.seconds} секунд",
+                  f"Потраченное время: {delta.seconds} секунд(ы)",
                   ""]
 
     # fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
@@ -419,10 +414,7 @@ def end(start_time):
                 if event.ui_element == next_button:
                     button = 1
                     flag_end = False
-                    # player, _, _ = generate_level(load_level(file[number - 1]))
-                    # camera = Camera()
                     return
-                    # start_game(player, camera)
                 if event.ui_element == menu_button:
                     flag_end = False
                     flag = False
@@ -431,18 +423,12 @@ def end(start_time):
                 if event.ui_element == zanavo_button:
                     button = 3
                     flag_end = False
-                    # player, _, _ = generate_level(load_level(file[number - 1]))
-                    # camera = Camera()
                     return
-                    # start_game(player, camera)
             manager3.process_events(event)
-        # manager3.update(FPS)
-        # manager3.draw_ui(screen)
         game.move()
         screen.blit(game.image, game.rect)
         clock.tick(fps)
         if shrift:
-            # end_3(delta)
             font = pygame.font.Font(None, 30)
             text_coord = 50
             for line in intro_text:
@@ -460,8 +446,9 @@ def end(start_time):
 
         pygame.display.update()
         pygame.display.flip()
-        clock.tick(FPS)
+        clock.tick(fps)
         stop = False
+        stop_2 = False
 
 
 def main():
@@ -472,45 +459,36 @@ def main():
                 sys.exit()
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == close_button:
-                    print('close')
                     terminate()
                 if event.ui_element == start_button:
-                    print('start')
                     player, _, _ = generate_level(load_level(file[number - 1]))
                     camera = Camera()
                     start_game(
                         player, camera
                     )
                 if event.ui_element == record_button:
-                    print('record')
                     flag = True
                 if event.ui_element == back_button:
-                    print('back')
                     flag = False
                 if event.ui_element == button_1:
-                    print('1')
                     number = 1
                     player, _, _ = generate_level(load_level(file[0]))
                     camera = Camera()
                     start_game(player, camera)
                 if event.ui_element == button_2:
-                    print('2')
                     number = 2
                     player, _, _ = generate_level(load_level(file[1]))
                     camera = Camera()
                     start_game(player, camera)
                 if event.ui_element == next_button:
-                    print('nexrt')
                     flag_end = False
                     player, _, _ = generate_level(load_level(file[number - 1]))
                     camera = Camera()
                     start_game(player, camera)
                 if event.ui_element == menu_button:
-                    print('menu')
                     flag_end = False
                     flag = False
                 if event.ui_element == zanavo_button:
-                    print('zanovo')
                     flag_end = False
                     player, _, _ = generate_level(load_level(file[number - 1]))
                     camera = Camera()
