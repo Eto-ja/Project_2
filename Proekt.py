@@ -327,6 +327,9 @@ def start_game(player, camera):
                     tiles_group = pygame.sprite.Group()
                     fon = load_image('over.jpg.jpeg')
                     screen.blit(fon, (0, 0))
+                    flag = False
+                    print('qqq')
+                    return
                 else:
                     number += 1
                     shrift = False
@@ -452,7 +455,12 @@ def end(start_time):
 
 
 def main():
-    global file, number, flag_end, flag
+    global file, number, flag_end, flag, number
+    if number == 2:
+        print('help')
+        fon = load_image('over.jpg.jpeg')
+        screen.blit(fon, (0, 0))
+        print('you wun')
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
