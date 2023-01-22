@@ -15,9 +15,10 @@ background = pygame.Surface((WIDTH, HEIGHT))
 background.fill(pygame.Color('#000000'))
 
 manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'theme.json')
-manager2 = pygame_gui.UIManager((WIDTH, HEIGHT))
-manager3 = pygame_gui.UIManager((WIDTH, HEIGHT))
+manager2 = pygame_gui.UIManager((WIDTH, HEIGHT), 'theme.json')
+manager3 = pygame_gui.UIManager((WIDTH, HEIGHT), 'theme.json')
 
+# создание кнопок
 close_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 40, HEIGHT // 2), (120, 50)),
                                             text='Выйти',
                                             manager=manager)
@@ -50,32 +51,36 @@ zanavo_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((340, 200
                                              manager=manager3)
 
 
+# закрытие программы
 def terminate():
     pygame.quit()
     sys.exit()
 
 
-def how():
-    intro_text = ["Правила игры", "",
-                  "Каждый уровень представляет собой лабиринт,",
-                  "нужно найти ключ, затем выйти через дверь.",
-                  "Без ключа выйти через дверь не получиться"]
-
-    # fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-    # screen.blit(fon, (0, 0))
-    font_2 = pygame.font.SysFont('Arial', 25)
-    pygame.draw.rect(
-        screen, pygame.Color('grey'), (380, 50, 80, 30))
-    font = pygame.font.Font(None, 30)
+# отрисовка текста
+def text(font, intro_text, color):
     text_coord = 50
     for line in intro_text:
-        string_rendered = font_2.render(line, 1, pygame.Color('blue'))
+        string_rendered = font.render(line, 1, pygame.Color(color))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
         intro_rect.x = 10
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
+
+
+# правила игры
+def how():
+    intro_text = ["Правила игры", "",
+                  "Каждый уровень представляет собой лабиринт,",
+                  "нужно найти ключ, затем выйти через дверь.",
+                  "Без ключа выйти через дверь не получиться"]
+
+    font_2 = pygame.font.SysFont('Arial', 25)
+    pygame.draw.rect(
+        screen, pygame.Color('grey'), (380, 50, 80, 30))
+    text(font_2, intro_text, 'blue')
     screen.blit(font_2.render('Назад', True, pygame.Color('black')), (380, 50))
 
     while True:
@@ -89,6 +94,7 @@ def how():
         clock.tick(FPS)
 
 
+# загрузка изображения
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     # если файл не существует, то выходим
@@ -99,6 +105,7 @@ def load_image(name, colorkey=None):
     return image
 
 
+# загрузка уровня
 def load_level(filename):
     filename = "data/" + filename
     # читаем уровень, убирая символы перевода строки
@@ -118,39 +125,62 @@ def load_level(filename):
 all_sprites = pygame.sprite.Group()
 
 
-class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns, rows, x, y):
-        super().__init__(all_sprites)
-        self.frames = []
-        self.cut_sheet(sheet, columns, rows)
-        self.cur_frame = 0
-        self.image = self.frames[self.cur_frame]
-        self.rect = self.rect.move(x, y)
+# здесь происходит анимация во время передвижения персонажа
+# w1 и w2 - передаются кол-во персонажей, k - кол-во кадров, name - имя файла, position - позиция,
+# p - в какую сторону движение
+def my_animation(w1, h1, k, fps, name, position, p):
+    animation_frames = []
+    timer = pygame.time.Clock()
 
-    def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-                                sheet.get_height() // rows)
-        for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.append(sheet.subsurface(pygame.Rect(
-                    frame_location, self.rect.size)))
+    sprite = pygame.image.load("data/{0}.png".format(name)).convert_alpha()
 
-    def update(self):
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-        self.image = self.frames[self.cur_frame]
+    width, height = sprite.get_size()
+    w, h = width / w1, height / h1
+
+    row = 0
+
+    for j in range(int(height / h)):
+        for i in range(int(width / w)):
+            animation_frames.append(sprite.subsurface(pygame.Rect(i * w, row, w, h)).convert_alpha())
+        row += int(h)
+
+    counter = 0
+    q = 0
+
+    while q < 2:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+        screen.blit(animation_frames[counter], position)
+
+        # движение вправо
+        if p == 1:
+            position = position[0] + 25, position[1]
+        # движение влево
+        if p == 2:
+            position = position[0] - 25, position[1]
+        # движение вниз
+        if p == 3:
+            position = position[0], position[1] + 25
+        # движение вверх
+        if p == 4:
+            position = position[0], position[1] - 25
+
+        counter = (counter + 1) % k
+        q += 1
+
+        pygame.display.update()
+        timer.tick(fps)
 
 
 tile_images = {
     'wall': load_image('kust.png'),
     'empty': load_image('linilium.png'),
-    'key': load_image('key.png'),
-    'door_open': load_image('door_open.png'),
+    'key': load_image('key-transformed.png'),
     'door_close': load_image('door_close.png')
 }
 
-# player_image = AnimatedSprite(load_image("people.png"), 4, 5, 50, 50)
-player_image = load_image("mar.png")
+player_image = load_image("people_stop-transformed.png").convert_alpha()
 
 tile_width = tile_height = 50
 
@@ -163,7 +193,7 @@ door_group = pygame.sprite.Group()
 start_time = 0
 shrift = False
 flag_end = False
-file = ['1.txt', 'map.txt']
+file = ['map.txt', '1.txt']
 number = 1
 flag = False
 stop = False
@@ -171,6 +201,7 @@ stop_2 = False
 button = 0
 
 
+# рисуется карта
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
@@ -186,49 +217,66 @@ class Tile(pygame.sprite.Sprite):
             tile_width * pos_x, tile_height * pos_y)
 
 
+# рисуется персонаж
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = player_image
         self.rect = self.image.get_rect().move(
-            tile_width * pos_x + 15, tile_height * pos_y + 5)
+            tile_width * pos_x, tile_height * pos_y)
         self.keys = 0
         self.play = False
 
     def right(self):
-        self.rect.x += 50
+        self.rect.x += 5
         if self.check_collide():
-            self.left()
+            self.rect.x -= 5
+        else:
+            self.rect.x -= 5
+            my_animation(5, 1, 5, 15, "people_left-transformed", (self.rect.x, self.rect.y), 1)
+            self.rect.x += 50
 
     def left(self):
-        self.rect.x -= 50
+        self.rect.x -= 5
         if self.check_collide():
-            self.right()
+            self.rect.x += 5
+        else:
+            self.rect.x += 5
+            my_animation(5, 1, 5, 15, "people_right-transformed", (self.rect.x, self.rect.y), 2)
+            self.rect.x -= 50
 
     def down(self):
-        self.rect.y += 50
+        self.rect.y += 5
         if self.check_collide():
-            self.up()
+            self.rect.y -= 5
+        else:
+            self.rect.y -= 5
+            my_animation(5, 1, 5, 15, "people_down-transformed", (self.rect.x, self.rect.y), 3)
+            self.rect.y += 50
 
     def up(self):
-        self.rect.y -= 50
+        self.rect.y -= 5
         if self.check_collide():
-            self.down()
+            self.rect.y += 5
+        else:
+            self.rect.y += 5
+            my_animation(5, 1, 5, 15, "people_up-transformed", (self.rect.x, self.rect.y), 4)
+            self.rect.y -= 50
 
+    # чтобы персонаж не ходил сквозь стены
     def check_collide(self):
         if pygame.sprite.spritecollide(self, boxes_group, False):
             return True
         return False
 
+    # проверка на столкновение с ключами или дверью
     def update(self):
         global stop, stop_2
         key = pygame.sprite.spritecollide(self, keys_group, False)
         if len(key) != 0:
             key = key[0]
             self.keys += 1
-            keys_group.remove(key)
-            all_sprites.remove(key)
-            tiles_group.remove(key)
+            key.kill()
 
         door = pygame.sprite.spritecollide(self, door_group, False)
         if len(door) != 0:
@@ -276,6 +324,17 @@ def generate_level(level):
     return new_player, x, y
 
 
+# очищение всех групп перед новой игрой
+def clear():
+    global shrift, all_sprites, boxes_group, door_group, keys_group, tiles_group
+    shrift = False
+    all_sprites = pygame.sprite.Group()
+    boxes_group = pygame.sprite.Group()
+    door_group = pygame.sprite.Group()
+    keys_group = pygame.sprite.Group()
+    tiles_group = pygame.sprite.Group()
+
+
 def start_game(player, camera):
     global start_time, stop, number, all_sprites, boxes_group, door_group, keys_group, tiles_group, button, shrift, \
         flag_end, flag, stop_2
@@ -309,75 +368,42 @@ def start_game(player, camera):
         player_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
+        # если игра закончилась
         if stop:
             button = 0
             end(start_time)
             screen.fill((0, 0, 0))
             stop = False
             start_time = datetime.datetime.now()
+            clear()
+            # если нажали кнопку следующая игра
             if button == 1:
+                player_group.remove(player)
                 if number == 2:
-                    print('You win!')
-                    shrift = False
-                    player_group.remove(player)
-                    all_sprites = pygame.sprite.Group()
-                    boxes_group = pygame.sprite.Group()
-                    door_group = pygame.sprite.Group()
-                    keys_group = pygame.sprite.Group()
-                    tiles_group = pygame.sprite.Group()
-                    fon = load_image('over.jpg.jpeg')
-                    screen.blit(fon, (0, 0))
                     flag = False
-                    print('qqq')
                     return
                 else:
                     number += 1
-                    shrift = False
-                    player_group.remove(player)
-                    all_sprites = pygame.sprite.Group()
-                    boxes_group = pygame.sprite.Group()
-                    door_group = pygame.sprite.Group()
-                    keys_group = pygame.sprite.Group()
-                    tiles_group = pygame.sprite.Group()
-
                     player, _, _ = generate_level(load_level(file[number - 1]))
-
                     player_group.add(player)
                     all_sprites.add(player)
-
                     camera = Camera()
+            # если нажали кнопку меню
             if button == 2:
-                shrift = False
                 flag_end = False
                 flag = False
-                all_sprites = pygame.sprite.Group()
-                boxes_group = pygame.sprite.Group()
-                door_group = pygame.sprite.Group()
-                keys_group = pygame.sprite.Group()
-                tiles_group = pygame.sprite.Group()
                 return
+            # если нажали кнопку пройти заново
             if button == 3:
-                shrift = False
                 player_group.remove(player)
-                all_sprites = pygame.sprite.Group()
-                boxes_group = pygame.sprite.Group()
-                door_group = pygame.sprite.Group()
-                keys_group = pygame.sprite.Group()
-                tiles_group = pygame.sprite.Group()
-
                 player, _, _ = generate_level(load_level(file[number - 1]))
-
                 player_group.add(player)
                 all_sprites.add(player)
         if stop_2:
             stop = True
 
-            # for item in all_sprites:
-            #     item.kill()
-            #     all_sprites.clear(screen, background)
-            #     all_sprites.draw(screen)
 
-
+# класс финального окна
 class Game(pygame.sprite.Sprite):
     def __init__(self, filename):
         super().__init__()
@@ -394,21 +420,18 @@ class Game(pygame.sprite.Sprite):
             shrift = True
 
 
+# конец игры
 def end(start_time):
     global flag_end, number, file, stop, button, shrift, flag, stop_2
     delta = datetime.datetime.now() - start_time
     game = Game('green.png')
-    fps = 300
+    fps = 600
     clock = pygame.time.Clock()
     intro_text = [f"Уровень {number} пройден", "",
                   f"Потраченное время: {delta.seconds} секунд(ы)",
                   ""]
 
-    # fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-    # screen.blit(fon, (0, 0))
-    # if len(file) < number:
-    #     number += 1
-
+    # опускается зелёный экран
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -433,15 +456,7 @@ def end(start_time):
         clock.tick(fps)
         if shrift:
             font = pygame.font.Font(None, 30)
-            text_coord = 50
-            for line in intro_text:
-                string_rendered = font.render(line, 1, pygame.Color('black'))
-                intro_rect = string_rendered.get_rect()
-                text_coord += 10
-                intro_rect.top = text_coord
-                intro_rect.x = 10
-                text_coord += intro_rect.height
-                screen.blit(string_rendered, intro_rect)
+            text(font, intro_text, 'black')
             flag_end = True
         if flag_end:
             manager3.update(FPS)
@@ -454,13 +469,9 @@ def end(start_time):
         stop_2 = False
 
 
+# основной цикл, проверяет кнопки меню и уровней
 def main():
     global file, number, flag_end, flag, number
-    if number == 2:
-        print('help')
-        fon = load_image('over.jpg.jpeg')
-        screen.blit(fon, (0, 0))
-        print('you wun')
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
